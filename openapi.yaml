@@ -8,8 +8,42 @@ servers:
     description: Локальный сервер для разработки
 
 paths:
+  /drop:
+    get:
+      tags:
+        - Отладка
+      summary: Очистка базы данных (только при отладке)
+      description: Выполняет полную очистку базы данных (точка работает только при отладке приложения APP_DEBUG=True).
+      responses:
+        "200":
+          description: "Очистка прошла успешно"
+  /ping:
+    get:
+      tags:
+        - Отладка
+      summary: Проверка состояния приложения (только при отладке)
+      description: Проверка того, что приложение работает и готово принимать входящие запросы (точка работает только при отладке приложения APP_DEBUG=True).
+      responses:
+        "200":
+          description: "Приложение работает"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              example:
+                status: "ok"
+                message: "pong"
+        "404":
+          description: "Режим отладки не включён, адрес не существует"
   /pixels:
     get:
+      tags:
+        - Основные
       summary: Получить текущие пиксели на доске
       description: Возвращает состояние всех пикселей на доске, включая их координаты и цвет.
       responses:
@@ -20,32 +54,38 @@ paths:
               schema:
                 type: object
                 properties:
-                  pixels:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        x:
-                          type: integer
-                          description: Координата пикселя по оси X
-                        y:
-                          type: integer
-                          description: Координата пикселя по оси Y
-                        color:
-                          type: string
-                          description: Цвет пикселя в формате HEX
-                          example: "#FFFFFF"
+                  items:
+                    type: object
+                    properties:
+                      x:
+                        type: integer
+                        description: Координата пикселя по оси X
+                      y:
+                        type: integer
+                        description: Координата пикселя по оси Y
+                      color:
+                        type: string
+                        description: Название цвета
+                        example: "white"
               example:
-                pixels:
-                  - x: 10
-                    y: 5
-                    color: "#FF5733"
-                  - x: 20
-                    y: 15
-                    color: "#00FF00"
+                - x: 10
+                  y: 5
+                  color: "white"
+                - x: 20
+                  y: 15
+                  color: "black"
     post:
+      tags:
+        - Основные
       summary: Установить цвет пикселя
       description: Устанавливает цвет пикселя на доске по указанным координатам.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
       requestBody:
         required: true
         content:
@@ -61,8 +101,8 @@ paths:
                   description: Координата пикселя по оси Y
                 color:
                   type: string
-                  description: Цвет пикселя в формате HEX
-                  example: "#FFFFFF"
+                  description: Название цвета
+                  example: "white"
       responses:
         '200':
           description: Успешное изменение цвета пикселя
@@ -73,15 +113,24 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Некорректный формат цвета"
   
-  /commands:
+  /command:
     post:
+      tags:
+        - Основные
       summary: Отправить команду роботу
       description: Отправляет команду роботу, например, "сотри всё", "останови работу" и т.д.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
       requestBody:
         required: true
         content:
@@ -103,13 +152,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Неизвестная команда"
 
   /image:
     post:
+      tags:
+        - Основные
       summary: Загрузить картинку для рисования
       description: Загружает изображение и начинает рисовать его на доске. Требуется Bearer токен для авторизации.
       parameters:
@@ -132,14 +183,15 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
                 image:
                   type: string
                   format: binary
-                  description: Изображение в формате PNG или JPG для рисования
+                  description: Изображение для предпросмотра
+                  example: base64 string
       responses:
         '200':
           description: Картинка успешно загружена и рисование началось
@@ -150,7 +202,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Неподдерживаемый формат изображения"
@@ -161,13 +213,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Отсутствует или неверный токен"
 
   /preview-image:
     post:
+      tags:
+        - Основные
       summary: Получить предпросмотр картинки
       description: Отправляет изображение для получения предпросмотра, не рисуя его на доске. Требуется Bearer токен для авторизации.
       parameters:
@@ -177,20 +231,10 @@ paths:
           schema:
             type: string
             example: "Bearer <token>"
-        - in: query
-          name: mode
-          required: true
-          schema:
-            type: string
-            enum:
-              - pixels
-              - lines
-            description: Режим работы, определяющий, как робот будет рисовать картинку (пикселями или линиями)
-            example: "pixels"
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -198,6 +242,14 @@ paths:
                   type: string
                   format: binary
                   description: Изображение для предпросмотра
+                  example: base64 string
+                mode:
+                  type: string
+                  enum:
+                    - "pixels"
+                    - "lines"
+                  description: Режим работы, определяющий, как робот будет рисовать картинку (пикселями или линиями)
+                  example: "pixels"
       responses:
         '200':
           description: Предпросмотр изображения успешно получен
@@ -217,7 +269,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Неподдерживаемый формат изображения"
@@ -228,15 +280,24 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     description: Описание ошибки
                     example: "Отсутствует или неверный токен"
 
   /status:
     get:
+      tags:
+        - Основные
       summary: Получить статус робота
       description: Возвращает текущий статус робота (например, работает ли он или остановлен).
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
       responses:
         '200':
           description: Статус робота
@@ -253,11 +314,19 @@ paths:
                     type: string
                     description: Дополнительное сообщение (например, ошибка или успех)
                     example: "Рисование в процессе"
-
   /delay:
     get:
+      tags:
+        - Основные
       summary: Получить время задержки перед следующим закрашиванием
       description: Получает текущую задержку (в миллисекундах), которую робот будет соблюдать перед следующим закрашиванием пикселя.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
       responses:
         '200':
           description: Задержка перед следующим закрашиванием
@@ -270,3 +339,133 @@ paths:
                     type: integer
                     description: Время задержки в миллисекундах
                     example: 1000
+  /auth/register:
+    post:
+      summary: Регистрация нового пользователя
+      description: Создает новую учетную запись пользователя с предоставленными учетными данными.
+      tags:
+        - Аутентификация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "john_doe"
+                  description: "Уникальное имя пользователя."
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                  description: "Email пользователя. Должен быть уникальным."
+                password:
+                  type: string
+                  format: password
+                  example: "SecurePassword123!"
+                  description: "Надежный пароль для учетной записи."
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "<token>"
+        '400':
+          description: Некорректный запрос (например, отсутствуют или недействительны поля или имя или почта заняты)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email уже занят."
+
+  /auth/login:
+    post:
+      summary: Вход пользователя
+      description: Аутентифицирует пользователя и возвращает токен доступа.
+      tags:
+        - Аутентификация
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                  description: "Email зарегистрированного пользователя."
+                password:
+                  type: string
+                  format: password
+                  example: "SecurePassword123!"
+                  description: "Пароль учетной записи пользователя."
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                    description: "JWT токен, используемый для аутентификации."
+        '401':
+          description: Неавторизован (неверные учетные данные)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Неверный email или пароль."
+
+  /auth/logout:
+    post:
+      summary: Выход пользователя
+      description: Аннулирует токен доступа пользователя.
+      tags:
+        - Аутентификация
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          description: "JWT токен, используемый для аутентификации."
+      responses:
+        '200':
+          description: Успешный выход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Пользователь успешно вышел."
+        '401':
+          description: Неавторизован (отсутствует или недействителен токен)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Недействительный или просроченный токен."
