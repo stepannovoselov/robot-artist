@@ -1,0 +1,272 @@
+openapi: 3.0.0
+info:
+  title: API для робота, рисующего на доске
+  description: API для взаимодействия с роботом, который рисует на доске через сайт. Возможности включают управление пикселями, загрузку картинок и отправку команд роботу.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Локальный сервер для разработки
+
+paths:
+  /pixels:
+    get:
+      summary: Получить текущие пиксели на доске
+      description: Возвращает состояние всех пикселей на доске, включая их координаты и цвет.
+      responses:
+        '200':
+          description: Успешный ответ с состоянием пикселей
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pixels:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        x:
+                          type: integer
+                          description: Координата пикселя по оси X
+                        y:
+                          type: integer
+                          description: Координата пикселя по оси Y
+                        color:
+                          type: string
+                          description: Цвет пикселя в формате HEX
+                          example: "#FFFFFF"
+              example:
+                pixels:
+                  - x: 10
+                    y: 5
+                    color: "#FF5733"
+                  - x: 20
+                    y: 15
+                    color: "#00FF00"
+    post:
+      summary: Установить цвет пикселя
+      description: Устанавливает цвет пикселя на доске по указанным координатам.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                x:
+                  type: integer
+                  description: Координата пикселя по оси X
+                y:
+                  type: integer
+                  description: Координата пикселя по оси Y
+                color:
+                  type: string
+                  description: Цвет пикселя в формате HEX
+                  example: "#FFFFFF"
+      responses:
+        '200':
+          description: Успешное изменение цвета пикселя
+        '400':
+          description: Некорректные данные (например, невалидный цвет или координаты)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Некорректный формат цвета"
+  
+  /commands:
+    post:
+      summary: Отправить команду роботу
+      description: Отправляет команду роботу, например, "сотри всё", "останови работу" и т.д.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: Команда для робота
+                  example: "clear_board"
+      responses:
+        '200':
+          description: Успешное выполнение команды
+        '400':
+          description: Некорректная команда
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Неизвестная команда"
+
+  /image:
+    post:
+      summary: Загрузить картинку для рисования
+      description: Загружает изображение и начинает рисовать его на доске. Требуется Bearer токен для авторизации.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
+        - in: query
+          name: mode
+          required: true
+          schema:
+            type: string
+            enum:
+              - pixels
+              - lines
+            description: Режим работы, определяющий, как робот будет рисовать картинку (пикселями или линиями)
+            example: "pixels"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Изображение в формате PNG или JPG для рисования
+      responses:
+        '200':
+          description: Картинка успешно загружена и рисование началось
+        '400':
+          description: Ошибка загрузки изображения (например, неподдерживаемый формат)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Неподдерживаемый формат изображения"
+        '401':
+          description: Неавторизованный доступ, требуем Bearer токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Отсутствует или неверный токен"
+
+  /preview-image:
+    post:
+      summary: Получить предпросмотр картинки
+      description: Отправляет изображение для получения предпросмотра, не рисуя его на доске. Требуется Bearer токен для авторизации.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
+        - in: query
+          name: mode
+          required: true
+          schema:
+            type: string
+            enum:
+              - pixels
+              - lines
+            description: Режим работы, определяющий, как робот будет рисовать картинку (пикселями или линиями)
+            example: "pixels"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Изображение для предпросмотра
+      responses:
+        '200':
+          description: Предпросмотр изображения успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preview_url:
+                    type: string
+                    description: Ссылка на предпросмотр изображения
+                    example: "http://localhost:5000/api/preview/abcd1234"
+        '400':
+          description: Ошибка загрузки изображения (например, неподдерживаемый формат)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Неподдерживаемый формат изображения"
+        '401':
+          description: Неавторизованный доступ, требуем Bearer токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Описание ошибки
+                    example: "Отсутствует или неверный токен"
+
+  /status:
+    get:
+      summary: Получить статус робота
+      description: Возвращает текущий статус робота (например, работает ли он или остановлен).
+      responses:
+        '200':
+          description: Статус робота
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Статус работы робота
+                    example: "working"
+                  message:
+                    type: string
+                    description: Дополнительное сообщение (например, ошибка или успех)
+                    example: "Рисование в процессе"
+
+  /delay:
+    get:
+      summary: Получить время задержки перед следующим закрашиванием
+      description: Получает текущую задержку (в миллисекундах), которую робот будет соблюдать перед следующим закрашиванием пикселя.
+      responses:
+        '200':
+          description: Задержка перед следующим закрашиванием
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delay:
+                    type: integer
+                    description: Время задержки в миллисекундах
+                    example: 1000
