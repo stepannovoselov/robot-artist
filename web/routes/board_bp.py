@@ -5,6 +5,7 @@ from werkzeug.exceptions import Forbidden
 from schemas import SetPixel
 from methods import *
 from config import DRAW_DELAY_MS
+from manage import db
 
 
 board_bp = Blueprint('board blueprint', __name__, url_prefix='/pixels')
@@ -28,7 +29,8 @@ def set_pixel_on_board(user, body: SetPixel):
 
     pixel = update_pixel(body.x, body.y, body.color)
 
-    user.delay = time.time()
+    user.delay = time.time() * 1000
+    db.session.commit()
 
     return jsonify({
         'x': pixel.x,

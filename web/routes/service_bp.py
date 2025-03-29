@@ -1,7 +1,8 @@
+import time
 from flask import jsonify, Blueprint
 from manage import db
-from config import APP_DEBUG
-from methods import access_token_required
+from config import APP_DEBUG, DRAW_DELAY_MS
+from methods import access_token_required, handle_errors
 
 
 service_bp = Blueprint('service blueprint', __name__)
@@ -35,3 +36,17 @@ def raise_user(user):
         db.session.commit()
         return {}, 200
     return {}, 404
+
+
+@service_bp.route('/delay', methods=['GET'])
+@handle_errors
+@access_token_required(required_status='user')
+def get_user_delay(user):
+    if DRAW_DELAY_MS - (time.time() * 1000 - user.delay) > 0:
+        delay = DRAW_DELAY_MS - (time.time() * 1000 - user.delay)
+    else:
+        delay = 0
+
+    return jsonify({
+        'delay': delay
+    }), 200

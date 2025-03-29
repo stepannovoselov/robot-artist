@@ -3,6 +3,8 @@ import pytest
 from uuid import uuid4
 import requests
 from config import BASE_URL
+from images_config import base64_str
+import base64
 
 
 faker = Faker(locale='ru_RU')
@@ -56,3 +58,8 @@ def admin_auth_token():
     assert response.status_code == 200
 
     return token
+
+
+@pytest.fixture
+def sample_image():
+    return base64_str

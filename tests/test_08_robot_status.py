@@ -1,6 +1,6 @@
 import requests
 from config import BASE_URL
-from fixtures import admin_auth_token, user_auth_token
+from fixtures import admin_auth_token
 import pytest
 
 
