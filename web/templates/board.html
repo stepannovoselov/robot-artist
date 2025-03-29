@@ -127,8 +127,9 @@
             body: JSON.stringify({ x: x, y: y, color: selectedColor })
         })
         .then(response => response.json())
-        .then(fetchPixels())
-        .then(() => {loader.style.display = "none";});
+        .then(() => {
+            setTimeout(() => {fetchPixels()}, 500);
+        });
     }
 
     fetchPixels();

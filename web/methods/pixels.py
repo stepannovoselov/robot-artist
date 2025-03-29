@@ -1,5 +1,5 @@
 from models import PixelField
-from manage import db
+from manage import db, redis_client
 from config import PIXELS_X, PIXELS_Y
 
 
@@ -8,6 +8,8 @@ def update_pixel(x, y, color):
 
     db.session.merge(pixel)
     db.session.commit()
+
+    redis_client.rpush("command_queue", f"{x},{y},{color}")
 
     return pixel
 
