@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+.pixel-board {
+    display: grid;
+    gap: 2px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pixel {
+    width: min(3vw, 3vh, 10px);
+    height: min(3vw, 3vh, 10px);
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.controls {
+    margin: 10px 0;
+    text-align: center;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.palette {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.color-picker {
+    width: 30px;
+    height: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px 1px black;
+}
+
+.selected {
+    border-color: yellow;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+    <h1 class="my-4">Доска пикселей</h1>
+
+    <button class="btn btn-sm btn-outline-primary" onclick="fetchPixels()">Обновить доску</button>
+    <span id="loader" class="spinner-border text-primary" role="status" style="display: none; width: 20px; height: 20px;">
+        <span class="visually-hidden">Загрузка...</span>
+    </span>
+
+    <div class="palette mt-4">
+        <div class="color-picker selected" style="background-color: white;" data-color="white"></div>
+        <div class="color-picker" style="background-color: black;" data-color="black"></div>
+        <div class="color-picker" style="background-color: red;" data-color="red"></div>
+    </div>
+
+    <div id="pixel-board" class="pixel-board"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedColor = "white";
+    let loader = document.getElementById("loader");
+
+    document.querySelectorAll(".color-picker").forEach(picker => {
+        picker.addEventListener("click", function() {
+            document.querySelectorAll(".color-picker").forEach(p => p.classList.remove("selected"));
+            this.classList.add("selected");
+            selectedColor = this.getAttribute("data-color");
+        });
+    });
+
+    function fetchPixels() {
+        loader.style.display = "inline-block";
+        fetch('/pixels')
+            .then(response => response.json())
+            .then(data => renderPixels(data))
+            .catch(error => console.error("Ошибка загрузки пикселей:", error))
+            .finally(() => {loader.style.display = "none";});
+    }
+
+    function renderPixels(pixels) {
+        loader.style.display = "inline-block";
+        const board = document.getElementById("pixel-board");
+        board.innerHTML = "";
+
+        if (pixels.length === 0) return;
+
+        const maxX = Math.max(...pixels.map(p => p.x)) + 1;
+
+        board.style.gridTemplateColumns = `repeat(${maxX}, 10px)`;
+
+        pixels.forEach(pixel => {
+            const pixelElement = document.createElement("div");
+            pixelElement.classList.add("pixel");
+            pixelElement.style.backgroundColor = pixel.color;
+            pixelElement.dataset.x = pixel.x;
+            pixelElement.dataset.y = pixel.y;
+            pixelElement.onclick = changePixelColor;
+            board.appendChild(pixelElement);
+        });
+        loader.style.display = "none";
+    }
+
+    function changePixelColor(event) {
+        loader.style.display = "inline-block";
+        const pixel = event.target;
+        const x = pixel.dataset.x;
+        const y = pixel.dataset.y;
+
+        pixel.style.backgroundColor = selectedColor;
+
+        fetch('/pixels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ x: x, y: y, color: selectedColor })
+        })
+        .then(response => response.json())
+        .then(fetchPixels())
+        .then(() => {loader.style.display = "none";});
+    }
+
+    fetchPixels();
+</script>
+{% endblock %}
+
+

@@ -435,7 +435,7 @@ paths:
                     example: "Неверный email или пароль."
 
   /auth/logout:
-    post:
+    get:
       summary: Выход пользователя
       description: Аннулирует токен доступа пользователя.
       tags:

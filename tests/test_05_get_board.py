@@ -20,5 +20,5 @@ def test_get_pixels(user_auth_token):
         assert "color" in pixel
         assert isinstance(pixel["x"], int)
         assert isinstance(pixel["y"], int)
-        assert pixel["color"] in ["white", "black"]
+        assert pixel["color"] in ["white", "black", 'red']
 

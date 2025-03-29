@@ -12,7 +12,7 @@ faker = Faker(locale='ru_RU')
 
 @pytest.fixture()
 def user_auth_token():
-    username = faker.user_name()
+    username = faker.user_name() + faker.user_name() + faker.user_name() + faker.user_name()
     email = faker.email()
     password = str(uuid4())
 

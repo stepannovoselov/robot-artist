@@ -1,0 +1,16 @@
+flask
+flask_sqlalchemy
+flask_migrate
+flask_bcrypt
+flask-pydantic
+pydantic
+pydantic[email]
+python-dotenv
+opencv-python
+Pillow
+numpy
+sqlalchemy
+pytest
+PyJWT
+requests
+faker

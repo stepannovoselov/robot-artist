@@ -7,7 +7,7 @@ from config import PIXELS_X, PIXELS_Y
 class SetPixel(BaseModel):
     x: int
     y: int
-    color: Literal['black', 'white']
+    color: Literal['black', 'white', 'red']
 
     @field_validator('x', mode='after')
     @classmethod

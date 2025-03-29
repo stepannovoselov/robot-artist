@@ -9,7 +9,7 @@ from fixtures import user_auth_token
     (20, 20, "black", 200),
     (PIXELS_X + 1, 10, "white", 400),
     (10, PIXELS_Y + 1, "black", 400),
-    (10, 10, "red", 400),
+    (10, 10, "pink", 400),
     (-1, 10, "white", 400),
     (10, -1, "black", 400),
 ])

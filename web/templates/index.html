@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 5rem 1rem;
+        background-color: #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: bold;
+        background: linear-gradient(90deg, #ff7eb3, #ff758c, #ff7eb3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: #6c757d;
+    }
+
+    .btn-primary {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+        border-radius: 30px;
+    }
+
+    .feature {
+        text-align: center;
+        margin-top: 2rem;
+        padding: 2rem;
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #ff758c;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 2rem;
+        background-color: #343a40;
+        color: #fff;
+        margin-top: 3rem;
+    }
+
+    .footer a {
+        color: #ff758c;
+        text-decoration: none;
+    }
+
+    .footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Декоративные элементы */
+    .ink-blot {
+        position: absolute;
+        top: 20px;
+        right: 10%;
+        width: 150px;
+        height: 150px;
+        background-color: rgba(255, 117, 140, 0.2);
+        border-radius: 50%;
+        transform: rotate(30deg);
+        z-index: -1;
+    }
+
+    .ink-blot::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 117, 140, 0.3);
+        border-radius: 50%;
+        transform: rotate(-15deg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ink-blot mt-2"></div>
+
+<div class="container mt-4">
+    <header class="hero">
+        <h1 class="hero-title">Добро пожаловать в Leonarto!</h1>
+        <p class="hero-subtitle">Творчество без границ – создавайте, делитесь и вдохновляйтесь.</p>
+        <a href="/auth/register" class="btn btn-primary mt-3" style="border-radius: 5px">Зарегистрироваться</a>
+    </header>
+
+    <section class="feature">
+        <h2>О проекте</h2>
+        <p>
+            <strong>Робот-Художник</strong> – автономное устройство для рисования на маркерной доске, использующее три цвета и встроенный ластик.
+            Разработан на <em>Python</em> с управлением через <strong>Raspberry Pi</strong>, что обеспечивает гибкость и расширяемость.
+        </p>
+
+        <p>
+            Взаимодействие происходит через <strong>HTTP-запросы</strong>, позволяя дистанционно управлять рисованием, сменой цвета и стиранием.
+            Алгоритмы привода и обработки команд обеспечивают точность движений, а архитектура проекта поддерживает интеграцию с другими сервисами.
+        </p>
+
+        <p>
+            Этот проект сочетает <strong>автоматизацию</strong> и <strong>искусство</strong>, давая возможность наблюдать за процессом рисования в реальном времени.
+            Используется как в <em>образовательных</em> целях, так и для <strong>творческих экспериментов</strong>.
+        </p>
+    </section>
+
+    <section class="feature">
+        <h2>Авторы</h2>
+        <p>S & M</p>
+    </section>
+
+    <section class="feature">
+        <h2>Ссылки</h2>
+        <a href="https://github.com/stepannovoselov/robot-artist" class="btn btn-dark mt-2">GitHub</a>
+    </section>
+
+    <section class="feature">
+        <h2>Дополнительная информация</h2>
+        <p>license</p>
+    </section>
+</div>
+{% endblock %}
+

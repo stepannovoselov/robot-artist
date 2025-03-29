@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<style>
+.error-container {
+    max-width: 500px;
+    margin: 10vh auto;
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #dc3545;
+}
+
+.error-title {
+    font-weight: bold;
+    font-size: 2rem;
+    margin-top: 1rem;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.btn-primary {
+    margin-top: 1rem;
+    width: 100%;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="error-container">
+        <div class="error-icon">⚠️🎨</div>
+
+        <h1 class="error-title">Ошибка {{ error_code }}</h1>
+        <p class="error-message">{{ error_message }}</p>
+
+        <a href="/" class="btn btn-primary">Вернуться на главную</a>
+    </div>
+</div>
+{% endblock %}
+

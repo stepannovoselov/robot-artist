@@ -24,7 +24,7 @@ def get_pixels_on_board(user):
 @access_token_required(required_status='user')
 @validate()
 def set_pixel_on_board(user, body: SetPixel):
-    if time.time() - user.delay < DRAW_DELAY_MS:
+    if time.time() * 1000 - user.delay < DRAW_DELAY_MS:
         raise Forbidden
 
     pixel = update_pixel(body.x, body.y, body.color)
